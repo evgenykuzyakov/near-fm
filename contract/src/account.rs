@@ -1,4 +1,50 @@
 use crate::*;
+use near_sdk::collections::UnorderedSet;
+
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct Account {
+    pub following: UnorderedSet<AccountId>,
+    pub followers: UnorderedSet<AccountId>,
+    pub num_posts: u64,
+    pub last_post_height: BlockHeight,
+}
+
+#[derive(BorshDeserialize, BorshSerialize)]
+pub enum VAccount {
+    Last(Account),
+}
+
+impl From<Account> for VAccount {
+    fn from(account: Account) -> Self {
+        Self::Last(account)
+    }
+}
+
+impl From<VAccount> for Account {
+    fn from(v_account: VAccount) -> Self {
+        match v_account {
+            VAccount::Last(account) => account,
+        }
+    }
+}
+
+#[derive(Serialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct AccountStats {
+    pub num_posts: u64,
+    pub num_followers: u64,
+    pub num_following: u64,
+}
+
+impl From<Account> for AccountStats {
+    fn from(account: Account) -> Self {
+        Self {
+            num_posts: account.num_posts,
+            num_followers: account.followers.len(),
+            num_following: account.following.len(),
+        }
+    }
+}
 
 #[near_bindgen]
 impl Contract {
@@ -82,12 +128,55 @@ impl Contract {
             .collect()
     }
 
-    pub fn get_account(&self, account_id: ValidAccountId) -> AccountStats {
-        let account = self.internal_get_account(account_id.as_ref());
-        AccountStats {
-            num_posts: account.num_posts,
-            num_followers: account.followers.len(),
-            num_following: account.following.len(),
-        }
+    pub fn get_account(&self, account_id: ValidAccountId) -> Option<AccountStats> {
+        self.internal_get_account_optional(account_id.as_ref())
+            .map(|a| a.into())
+    }
+
+    pub fn get_accounts(&self, from_index: u64, limit: u64) -> Vec<(AccountId, AccountStats)> {
+        let account_ids = self.accounts.keys_as_vector();
+        let accounts = self.accounts.values_as_vector();
+        (from_index..std::cmp::min(from_index + limit, account_ids.len()))
+            .map(|index| {
+                let account_id = account_ids.get(index).unwrap();
+                let account: Account = accounts.get(index).unwrap().into();
+                (account_id, account.into())
+            })
+            .collect()
+    }
+}
+
+impl Contract {
+    pub(crate) fn internal_create_account(&mut self, account_id: &AccountId) -> Account {
+        let hash = env::sha256(account_id.as_bytes());
+        let mut following_key = vec![b'o'];
+        following_key.extend_from_slice(&hash);
+        let mut followers_key = vec![b'i'];
+        followers_key.extend(&hash);
+        let account = Account {
+            following: UnorderedSet::new(following_key),
+            followers: UnorderedSet::new(followers_key),
+            num_posts: 0,
+            last_post_height: 0,
+        };
+        let v_account = account.into();
+        assert!(
+            self.accounts.insert(&account_id, &v_account).is_none(),
+            "Account already exists"
+        );
+        v_account.into()
+    }
+
+    pub(crate) fn internal_get_account_optional(&self, account_id: &AccountId) -> Option<Account> {
+        self.accounts.get(&account_id).map(|a| a.into())
+    }
+
+    pub(crate) fn internal_get_account(&self, account_id: &AccountId) -> Account {
+        self.internal_get_account_optional(account_id)
+            .expect("Account doesn't exist")
+    }
+
+    pub(crate) fn internal_set_account(&mut self, account_id: &AccountId, account: Account) {
+        self.accounts.insert(account_id, &account.into());
     }
 }

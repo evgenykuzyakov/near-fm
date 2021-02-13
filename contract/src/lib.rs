@@ -6,20 +6,18 @@ use near_sdk::{
     env, near_bindgen, AccountId, Balance, BlockHeight, PanicOnDefault, Promise, StorageUsage,
 };
 
-pub use crate::graph::*;
+pub use crate::account::*;
 use crate::internal::*;
 pub use crate::post::*;
 pub use crate::storage_manager::*;
-use crate::types::*;
 
 const LONGEST_ACCOUNT_ID: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const MAX_ACCOUNT_ID_LENGTH: usize = 64;
 
-mod graph;
+mod account;
 mod internal;
 mod post;
 mod storage_manager;
-mod types;
 
 #[global_allocator]
 static ALLOC: near_sdk::wee_alloc::WeeAlloc<'_> = near_sdk::wee_alloc::WeeAlloc::INIT;

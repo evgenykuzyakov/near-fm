@@ -10,6 +10,12 @@ const STORAGE_PRICE_PER_BYTE: Balance = 10_000_000_000_000_000_000;
 /// The minimum amount in bytes to register an account.
 const MIN_STORAGE_SIZE: StorageUsage = 1000;
 
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct StorageAccount {
+    pub balance: Balance,
+    pub used_bytes: StorageUsage,
+}
+
 #[derive(Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct AccountStorageBalance {

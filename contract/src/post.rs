@@ -1,5 +1,32 @@
 use crate::*;
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Post {
+    pub body: String,
+    pub time: U64,
+    pub block_height: BlockHeight,
+}
+
+#[derive(BorshDeserialize, BorshSerialize)]
+pub enum VPost {
+    Last(Post),
+}
+
+impl From<Post> for VPost {
+    fn from(post: Post) -> Self {
+        Self::Last(post)
+    }
+}
+
+impl From<VPost> for Post {
+    fn from(v_post: VPost) -> Self {
+        match v_post {
+            VPost::Last(post) => post,
+        }
+    }
+}
+
 #[near_bindgen]
 impl Contract {
     pub fn post(&mut self, body: String) -> Post {
