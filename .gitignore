@@ -1,9 +1,9 @@
 #IDE
 .idea
 
+neardev
 target
 
 # OS X
 .DS_Store
 
-res/berry_bot.wasm

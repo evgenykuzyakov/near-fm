@@ -86,10 +86,11 @@ impl StorageManager for Contract {
         if let Some(storage_account) = self.storage_accounts.get(account_id.as_ref()) {
             AccountStorageBalance {
                 total: storage_account.balance.into(),
-                available: std::cmp::min(
-                    storage_account.balance - self.storage_minimum_balance().0,
-                    Balance::from(storage_account.used_bytes) * STORAGE_PRICE_PER_BYTE,
-                )
+                available: (storage_account.balance
+                    - std::cmp::max(
+                        self.storage_minimum_balance().0,
+                        Balance::from(storage_account.used_bytes) * STORAGE_PRICE_PER_BYTE,
+                    ))
                 .into(),
             }
         } else {
