@@ -2,66 +2,62 @@ import "./Home.scss";
 import React, {useEffect, useState} from 'react';
 import NewPost from "../components/NewPost";
 import Feed from "../components/Feed";
-import { SortedSet } from "collections/sorted-set";
+import {convertAccountStats} from "../data/Account";
+
+const FetchLimit = 100;
 
 function HomePage(props) {
-  const [followingPosts, setFollowingPosts] = useState([]);
-  const [latestPosts, setLatestPosts] = useState([]);
+  const [followingSeed, setFollowingSeed] = useState(false);
+  const [latestSeed, setLatestSeed] = useState(false);
 
-  const account = props.account;
-  async function fetchPosts() {
-    if (!account || !account.lastPostHeight) {
-      return;
-    }
-    const accountData = props._near.accountData;
-    await accountData.fetchFollowings();
-
-    const recent = new SortedSet(accountData.followings.map(
+  const accountData = props._near.accountData;
+  if (accountData && followingSeed === false) {
+    const seed = Object.entries(accountData.followings).map(
       ([accountId, accountStats]) => [accountStats.lastPostHeight, accountId]
-    ));
-    recent.push([accountData.account.lastPostHeight, accountData.account.accountId]);
-
-    const posts = [];
-    while (recent.length > 0 && posts.length < 10) {
-      const [blockHeight, accountId] = recent.pop();
-      if (blockHeight === 0) {
-        break;
-      }
-      const post = await props._near.blockViewCall(blockHeight, 'get_post', {account_id: accountId});
-      if (post) {
-        recent.push([post.block_height - 1, accountId])
-        posts.push({
-          accountId,
-          post
-        })
-      }
+    );
+    if (accountData.stats.lastPostHeight > 0) {
+      seed.push([accountData.stats.lastPostHeight, accountData.accountId]);
     }
-    setFollowingPosts(posts);
+    setFollowingSeed(seed);
+  }
+
+  async function fetchRandomFeed() {
+    const numAccounts = await props._near.contract.get_num_accounts();
+    return (await props._near.contract.get_accounts({
+      from_index: Math.max(numAccounts - FetchLimit, 0),
+      limit: FetchLimit
+    })).map(([accountId, accountStats]) => [convertAccountStats(accountStats).lastPostHeight, accountId]);
   }
 
   useEffect(() => {
-    fetchPosts();
-  }, [account]);
+    if (props.connected && props._near) {
+      fetchRandomFeed().then((seed) => {
+        setLatestSeed(seed);
+      });
+    }
+  }, [props.connected])
 
   return (
     <div>
       <div className="container">
-        <div className="row">
-          {account && account.enoughStorageBalance && (
-            <NewPost {...props}/>
-          )}
-          {followingPosts && (
-            <div>
-              <h3>Following</h3>
-              <Feed {...props} posts={followingPosts}/>
-            </div>
-          )}
-          {latestPosts && (
-            <div>
-              <h3>Latest posts</h3>
-              <Feed {...props} posts={latestPosts}/>
-            </div>
-          )}
+        <div className="row justify-content-md-center">
+          <div className="col col-lg-8 col-xl-6">
+            {props.enoughStorageBalance && (
+              <NewPost {...props}/>
+            )}
+            {followingSeed && followingSeed.length > 0 && (
+              <div>
+                <h3>Feed</h3>
+                <Feed {...props} seed={followingSeed}/>
+              </div>
+            )}
+            {latestSeed && (
+              <div>
+                <h3>Random</h3>
+                <Feed {...props} seed={latestSeed}/>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

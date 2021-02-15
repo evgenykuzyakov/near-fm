@@ -140,6 +140,10 @@ impl Contract {
             })
             .collect()
     }
+
+    pub fn get_num_accounts(&self) -> u64 {
+        self.accounts.len()
+    }
 }
 
 impl Contract {

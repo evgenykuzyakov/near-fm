@@ -1,12 +1,13 @@
 import React from 'react';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.scss";
 import './gh-fork-ribbon.css';
 import HomePage from "./pages/Home"
 import AccountPage from "./pages/Account"
 import { HashRouter as Router, Route, Switch } from 'react-router-dom'
 import * as nearAPI from 'near-api-js'
-import BN from 'bn.js';
-import AccountData from "./data/Account";
+import {AccountData} from "./data/Account";
 
 const IsMainnet = window.location.hostname === "near.vodka";
 const TestNearConfig = {
@@ -53,12 +54,13 @@ class App extends React.Component {
 
     this.state = {
       connected: false,
+      isNavCollapsed: true,
     };
 
     this._initNear().then(() => {
       this.setState({
         signedIn: !!this._near.accountId,
-        accountId: this._near.accountId,
+        signedAccountId: this._near.accountId,
         connected: true,
       });
     });
@@ -76,14 +78,25 @@ class App extends React.Component {
 
     this._near.account = this._near.walletConnection.account();
     this._near.contract = new nearAPI.Contract(this._near.account, NearConfig.contractName, {
-      viewMethods: ['get_account', 'get_accounts', 'get_followers', 'get_following', 'get_post', 'storage_minimum_balance', 'storage_balance_of'],
+      viewMethods: ['get_account', 'get_accounts', 'get_num_accounts', 'get_followers', 'get_following', 'get_post', 'storage_minimum_balance', 'storage_balance_of'],
       changeMethods: ['storage_deposit', 'storage_withdraw', 'post', 'follow', 'unfollow'],
     });
     this._near.storageMinimumBalance = await this._near.contract.storage_minimum_balance();
+
+    this._near.accounts = {};
+    this._near.getAccount = (accountId) => {
+      if (accountId in this._near.accounts) {
+        return this._near.accounts[accountId];
+      }
+      return this._near.accounts[accountId] = Promise.resolve(AccountData.load(this._near, accountId));
+    };
+
     if (this._near.accountId) {
-      this._near.accountData = await AccountData.load(this._near, this._near.accountId);
+      this._near.accountData = await this._near.getAccount(this._near.accountId);
+      await this._near.accountData.fetchFollowings();
       this.setState({
-        account: this._near.accountData.state(),
+        followings: Object.assign({}, this._near.accountData.followings),
+        enoughStorageBalance: this._near.accountData.stats.enoughStorageBalance,
       });
     }
   }
@@ -104,7 +117,7 @@ class App extends React.Component {
     this._near.accountId = null;
     this.setState({
       signedIn: !!this._accountId,
-      accountId: this._accountId,
+      signedAccountId: this._accountId,
     })
   }
 
@@ -119,22 +132,17 @@ class App extends React.Component {
       <div>Connecting... <span className="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span></div>
     ) : (this.state.signedIn ? (
       <div>
-        {!this.state.account.enoughStorageBalance && (
-          <div style={{marginBottom: "10px"}}>
-            <button
-              className="btn btn-primary"
-              onClick={(e) => this.requestStorageBalance(e)}>Add storage balance</button>
-          </div>
-        )}
-        <div className="float-end">
+        {!this.state.enoughStorageBalance && (
           <button
-            className="btn btn-outline-secondary"
-            onClick={() => this.logOut()}>Log out ({this.state.accountId})</button>
-        </div>
-
+            className="btn btn-primary me-md-2"
+            onClick={(e) => this.requestStorageBalance(e)}>Add storage balance</button>
+        )}
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => this.logOut()}>Log out ({this.state.signedAccountId})</button>
       </div>
     ) : (
-      <div style={{marginBottom: "10px"}}>
+      <div>
         <button
           className="btn btn-primary"
           onClick={(e) => this.requestSignIn(e)}>Log in with NEAR Wallet</button>
@@ -143,7 +151,7 @@ class App extends React.Component {
 
     return (
       <div className="App">
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <nav className="navbar navbar-expand-lg navbar-light bg-light mb-3">
           <div className="container-fluid">
             <a className="navbar-brand" href="/">NEAR Vodka - connecting people</a>
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -170,10 +178,10 @@ class App extends React.Component {
         <Router basename={process.env.PUBLIC_URL}>
           <Switch>
             <Route exact path={"/"}>
-              <HomePage _near={this._near} {...this.state}/>
+              <HomePage _near={this._near} {...this.state} updateState={(s) => this.setState(s)}/>
             </Route>
             <Route exact path={"/a/:accountId"}>
-              <AccountPage _near={this._near} {...this.state} />
+              <AccountPage _near={this._near} {...this.state} updateState={(s) => this.setState(s)} />
             </Route>
           </Switch>
         </Router>

@@ -1,0 +1,26 @@
+.account {
+  display: inline-block;
+}
+
+.account-tooltip {
+  border: #ddd 1px solid !important;
+  background-color: #fff !important;
+  color: #333 !important;
+  height: 200px;
+  width: 300px;
+  pointer-events: auto !important;
+  &:hover {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+.account-handle {
+  color: #333;
+  text-decoration: none;
+
+  &:hover {
+    color: #000;
+    text-decoration: underline;
+  }
+}

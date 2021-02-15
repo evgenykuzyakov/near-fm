@@ -1,21 +1,25 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 function NewPost(props) {
-  let textInput = React.createRef();
+  const [ body, setBody ] = useState("");
 
   const post = async () => {
-    let body = textInput.current.value;
-    await props._near.contract.post({body})
+    let _body = body;
+    setBody("");
+    await props._near.contract.post({body: _body})
   };
 
   return (
     <div>
       <form>
         <div className="mb-3">
-          <textarea ref={textInput} className="form-control" placeholder={"New post"}></textarea>
+          <textarea
+            className="form-control" placeholder={"New post"} rows="5" value={body}
+            onChange={(e) => setBody(e.target.value)}
+          />
         </div>
-        <div className="mb-3">
-        <button className="btn btn-primary" onClick={post}>Post</button>
+        <div className="mb-3 d-grid gap-2 d-md-flex justify-content-md-end">
+          <button className="btn btn-primary" disabled={!body} onClick={post}>Post now</button>
         </div>
       </form>
     </div>

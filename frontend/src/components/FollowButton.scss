@@ -1,0 +1,25 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
+.follow-button {
+  .btn {
+    width: 10em;
+  }
+}
+
+.btn-follow {
+}
+
+.btn-unfollow {
+  &:hover {
+    &:active {
+
+    }
+    background-color: $danger !important;
+    span {
+      display: none;
+    }
+    &:after {
+      content: "Unfollow";
+    }
+  }
+}

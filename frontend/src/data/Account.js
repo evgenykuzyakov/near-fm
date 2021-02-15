@@ -15,9 +15,13 @@ const convertAccountStats = (accountStats) => {
 class AccountData {
   constructor(_near, accountId) {
     this._near = _near;
-    this._accountId = accountId;
-    this.account = {
-      accountId: this._accountId,
+    this.accountId = accountId;
+    this.stats = {
+      lastPostHeight: 0,
+      numFollowers: 0,
+      numFollowing: 0,
+      numPosts: 0,
+      enoughStorageBalance: false,
     };
     this.followings = false;
     this.followers = false;
@@ -31,18 +35,16 @@ class AccountData {
   }
 
   async _fetchStorageBalance() {
-    let storageBalance = await this._near.contract.storage_balance_of({account_id: this._accountId});
-    this.account.storageBalance = {
-      total: new BN(storageBalance.total),
-      available: new BN(storageBalance.available),
-    };
-    this.account.enoughStorageBalance = storageBalance.available > MinEnoughStorageBalance;
+    let storageBalance = await this._near.contract.storage_balance_of({account_id: this.accountId});
+    this.stats.storageTotal = new BN(storageBalance.total);
+    this.stats.storageAvailable = new BN(storageBalance.available);
+    this.stats.enoughStorageBalance = this.stats.storageAvailable > MinEnoughStorageBalance;
   }
 
   async _fetchAccountStats() {
-    const accountStats = await this._near.contract.get_account({account_id: this._accountId});
+    const accountStats = await this._near.contract.get_account({account_id: this.accountId});
     if (accountStats) {
-      Object.assign(this.account, convertAccountStats(accountStats));
+      Object.assign(this.stats, convertAccountStats(accountStats));
     }
   }
 
@@ -56,22 +58,18 @@ class AccountData {
       return;
     }
     const promises = [];
-    for (let i = 0; i < this.account.numFollowing; i += FetchLimit) {
-      promises.push(this._contract.get_following({
-        account_id: this._accountId,
+    for (let i = 0; i < this.stats.numFollowing; i += FetchLimit) {
+      promises.push(this._near.contract.get_following({
+        account_id: this.accountId,
         from_index: i,
         limit: FetchLimit,
       }));
     }
-    this.followings = (await Promise.all(promises)).reduce((fs, f) => {
-      fs.append(f.map(([accountId, accountStats]) => [accountId, convertAccountStats(accountStats)]));
-      return fs;
-    }, []);
-  }
-
-  state() {
-    return Object.assign({}, this.account)
+    this.followings = {};
+    (await Promise.all(promises)).flat().forEach(([accountId, accountStats]) => {
+      this.followings[accountId] = convertAccountStats(accountStats);
+    });
   }
 }
 
-export default AccountData;
+export {AccountData, convertAccountStats};
