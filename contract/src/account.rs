@@ -1,5 +1,5 @@
 use crate::*;
-use near_sdk::collections::UnorderedSet;
+use near_sdk::collections::{UnorderedSet, Vector};
 
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Account {
@@ -34,6 +34,7 @@ pub struct AccountStats {
     pub num_posts: u64,
     pub num_followers: u64,
     pub num_following: u64,
+    pub last_post_height: u64,
 }
 
 impl From<Account> for AccountStats {
@@ -42,6 +43,7 @@ impl From<Account> for AccountStats {
             num_posts: account.num_posts,
             num_followers: account.followers.len(),
             num_following: account.following.len(),
+            last_post_height: account.last_post_height,
         }
     }
 }
@@ -107,12 +109,9 @@ impl Contract {
         account_id: ValidAccountId,
         from_index: u64,
         limit: u64,
-    ) -> Vec<AccountId> {
+    ) -> Vec<(AccountId, AccountStats)> {
         let account = self.internal_get_account(account_id.as_ref());
-        let followers = account.followers.as_vector();
-        (from_index..std::cmp::min(from_index + limit, followers.len()))
-            .filter_map(|index| followers.get(index))
-            .collect()
+        self.get_account_range(account.followers.as_vector(), from_index, limit)
     }
 
     pub fn get_following(
@@ -120,12 +119,9 @@ impl Contract {
         account_id: ValidAccountId,
         from_index: u64,
         limit: u64,
-    ) -> Vec<AccountId> {
+    ) -> Vec<(AccountId, AccountStats)> {
         let account = self.internal_get_account(account_id.as_ref());
-        let following = account.following.as_vector();
-        (from_index..std::cmp::min(from_index + limit, following.len()))
-            .filter_map(|index| following.get(index))
-            .collect()
+        self.get_account_range(account.following.as_vector(), from_index, limit)
     }
 
     pub fn get_account(&self, account_id: ValidAccountId) -> Option<AccountStats> {
@@ -147,6 +143,22 @@ impl Contract {
 }
 
 impl Contract {
+    pub(crate) fn get_account_range(
+        &self,
+        account_ids: &Vector<AccountId>,
+        from_index: u64,
+        limit: u64,
+    ) -> Vec<(AccountId, AccountStats)> {
+        (from_index..std::cmp::min(from_index + limit, account_ids.len()))
+            .filter_map(|index| {
+                account_ids.get(index).and_then(|account_id| {
+                    self.internal_get_account_optional(&account_id)
+                        .map(|account| (account_id, account.into()))
+                })
+            })
+            .collect()
+    }
+
     pub(crate) fn internal_create_account(&mut self, account_id: &AccountId) -> Account {
         let hash = env::sha256(account_id.as_bytes());
         let mut following_key = vec![b'o'];

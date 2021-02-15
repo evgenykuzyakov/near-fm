@@ -6,6 +6,7 @@ pub struct Post {
     pub body: String,
     pub time: U64,
     pub block_height: BlockHeight,
+    pub last_post_height: BlockHeight,
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -41,11 +42,13 @@ impl Contract {
             body,
             time: env::block_timestamp().into(),
             block_height,
+            last_post_height: account.last_post_height,
         };
         let v_post = post.into();
         self.posts.insert(&account_id, &v_post);
         account.num_posts += 1;
         account.last_post_height = block_height;
+        self.internal_set_account(&account_id, account);
         self.finalize_storage_update(storage_update);
         v_post.into()
     }
