@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/near-vodka/static/css/main.95bd0358.chunk.css",
+    "main.js": "/near-vodka/static/js/main.a19c046b.chunk.js",
+    "main.js.map": "/near-vodka/static/js/main.a19c046b.chunk.js.map",
+    "runtime-main.js": "/near-vodka/static/js/runtime-main.31ad8391.js",
+    "runtime-main.js.map": "/near-vodka/static/js/runtime-main.31ad8391.js.map",
+    "static/css/2.f747b8b9.chunk.css": "/near-vodka/static/css/2.f747b8b9.chunk.css",
+    "static/js/2.4e769aea.chunk.js": "/near-vodka/static/js/2.4e769aea.chunk.js",
+    "static/js/2.4e769aea.chunk.js.map": "/near-vodka/static/js/2.4e769aea.chunk.js.map",
+    "index.html": "/near-vodka/index.html",
+    "precache-manifest.f9063f2e62c0fe3119cd9a47d429e67c.js": "/near-vodka/precache-manifest.f9063f2e62c0fe3119cd9a47d429e67c.js",
+    "service-worker.js": "/near-vodka/service-worker.js",
+    "static/css/2.f747b8b9.chunk.css.map": "/near-vodka/static/css/2.f747b8b9.chunk.css.map",
+    "static/css/main.95bd0358.chunk.css.map": "/near-vodka/static/css/main.95bd0358.chunk.css.map",
+    "static/js/2.4e769aea.chunk.js.LICENSE.txt": "/near-vodka/static/js/2.4e769aea.chunk.js.LICENSE.txt",
+    "static/media/near_vodka_logo.png": "/near-vodka/static/media/near_vodka_logo.f18e89c9.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.31ad8391.js",
+    "static/css/2.f747b8b9.chunk.css",
+    "static/js/2.4e769aea.chunk.js",
+    "static/css/main.95bd0358.chunk.css",
+    "static/js/main.a19c046b.chunk.js"
+  ]
+}
