@@ -6,6 +6,7 @@ function Feed(props) {
   const [posts, setPosts] = useState([]);
 
   const seed = props.seed;
+  const extraPosts = props.extraPosts || [];
 
   async function fetchPosts(seed) {
     const posts = [];
@@ -35,7 +36,7 @@ function Feed(props) {
     }
   }, [seed]);
 
-  const feed = posts.map(post => {
+  const feed = [...extraPosts, ...posts].map(post => {
     const key = `${post.accountId}/${post.post.block_height}`;
     return <Post key={key} accountId={post.accountId} post={post.post} {...props}/>;
   });

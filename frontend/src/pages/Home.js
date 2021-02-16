@@ -48,7 +48,7 @@ function HomePage(props) {
             {followingSeed && followingSeed.length > 0 && (
               <div>
                 <h3>Feed</h3>
-                <Feed {...props} seed={followingSeed}/>
+                <Feed {...props} seed={followingSeed} extraPosts={props.newPosts}/>
               </div>
             )}
             {latestSeed && (

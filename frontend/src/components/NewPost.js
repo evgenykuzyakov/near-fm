@@ -7,6 +7,16 @@ function NewPost(props) {
     let _body = body;
     setBody("");
     await props._near.contract.post({body: _body})
+    let newPosts = {
+      accountId: props.signedAccountId,
+      post: {
+        body: _body,
+        time: (new Date().getTime() * 1000000).toString(),
+      }
+    }
+    props.updateState({
+      newPosts: [...props.newPosts, newPosts]
+    })
   };
 
   return (

@@ -8,11 +8,16 @@ import AccountPage from "./pages/Account"
 import { HashRouter as Router, Route, Switch } from 'react-router-dom'
 import * as nearAPI from 'near-api-js'
 import {AccountData} from "./data/Account";
+import NearVodkaLogo from "./images/near_vodka_logo.png"
+
+// 4 epochs
+const NumBlocksNonArchival = 4 * 12 * 3600;
 
 const IsMainnet = window.location.hostname === "near.vodka";
 const TestNearConfig = {
   networkId: 'testnet',
   nodeUrl: 'https://rpc.testnet.near.org',
+  archivalNodeUrl: 'https://rpc.testnet.internal.near.org',
   contractName: 'dev-1613368835598-7014445',
   walletUrl: 'https://wallet.testnet.near.org',
 };
@@ -20,6 +25,7 @@ const TestNearConfig = {
 const MainNearConfig = {
   networkId: 'testnet',
   nodeUrl: 'https://rpc.testnet.near.org',
+  archivalNodeUrl: 'https://rpc.testnet.internal.near.org',
   contractName: 'dev-1613368835598-7014445',
   walletUrl: 'https://wallet.testnet.near.org',
 };
@@ -41,7 +47,10 @@ class App extends React.Component {
       async blockViewCall(blockId, methodName, args) {
         args = args || {};
         this.account.validateArgs(args);
-        const result = await this.account.connection.provider.query({
+        const connection = blockId + NumBlocksNonArchival < this.lastBlockHeight ?
+          this.archivalConnection :
+          this.account.connection;
+        const result = await connection.provider.query({
           request_type: 'call_function',
           block_id: blockId,
           account_id: NearConfig.contractName,
@@ -55,6 +64,7 @@ class App extends React.Component {
     this.state = {
       connected: false,
       isNavCollapsed: true,
+      newPosts: [],
     };
 
     this._initNear().then(() => {
@@ -70,6 +80,11 @@ class App extends React.Component {
   async _initNear() {
     const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
     const near = await nearAPI.connect(Object.assign({deps: {keyStore}}, NearConfig));
+    this._near.archivalConnection = nearAPI.Connection.fromConfig({
+      networkId: NearConfig.networkId,
+      provider: { type: 'JsonRpcProvider', args: { url: NearConfig.archivalNodeUrl } },
+      signer: { type: 'InMemorySigner', keyStore }
+    });
     this._near.keyStore = keyStore;
     this._near.near = near;
 
@@ -77,6 +92,8 @@ class App extends React.Component {
     this._near.accountId = this._near.walletConnection.getAccountId();
 
     this._near.account = this._near.walletConnection.account();
+    const block = await this._near.account.connection.provider.block({ finality: 'final' });
+    this._near.lastBlockHeight = block.header.height;
     this._near.contract = new nearAPI.Contract(this._near.account, NearConfig.contractName, {
       viewMethods: ['get_account', 'get_accounts', 'get_num_accounts', 'get_followers', 'get_following', 'get_post', 'storage_minimum_balance', 'storage_balance_of'],
       changeMethods: ['storage_deposit', 'storage_withdraw', 'post', 'follow', 'unfollow'],
@@ -153,7 +170,10 @@ class App extends React.Component {
       <div className="App">
         <nav className="navbar navbar-expand-lg navbar-light bg-light mb-3">
           <div className="container-fluid">
-            <a className="navbar-brand" href="/">NEAR Vodka - connecting people</a>
+            <a className="navbar-brand" href="/" title="NEAR Vodka - connecting people">
+              <img src={NearVodkaLogo} alt="NEAR Vodka" className="d-inline-block align-middle" />
+              NEAR Vodka
+            </a>
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -162,7 +182,7 @@ class App extends React.Component {
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
               <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                 <li className="nav-item">
-                  <a className="nav-link active" aria-current="page" href="/">Home</a>
+                  {/*<a className="nav-link active" aria-current="page" href="/">Home</a>*/}
                 </li>
               </ul>
               <form className="d-flex">
