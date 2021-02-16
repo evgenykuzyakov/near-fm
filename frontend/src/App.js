@@ -1,4 +1,5 @@
 import React from 'react';
+import "error-polyfill";
 import 'bootstrap/dist/js/bootstrap.bundle';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.scss";

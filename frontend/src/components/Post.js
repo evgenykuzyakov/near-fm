@@ -1,4 +1,5 @@
 import React from 'react';
+import './Post.scss';
 import Account from "./Account";
 import TimeAgo from "timeago-react";
 
@@ -10,9 +11,9 @@ function Post(props) {
       <div className="card-body">
         <h5 className="card-title"><Account {...props} accountId={accountId} /></h5>
         <h6 className="card-subtitle mb-2 text-muted"><TimeAgo datetime={new Date(parseFloat(post.time) / 1_000_000)} /></h6>
-        <p className="card-text">
+        <div className="card-text">
           {post.body}
-        </p>
+        </div>
       </div>
     </div>
   );
