@@ -1,5 +1,5 @@
 import React from 'react';
-import 'bootstrap';
+import 'bootstrap/dist/js/bootstrap.bundle';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.scss";
 import './gh-fork-ribbon.css';
