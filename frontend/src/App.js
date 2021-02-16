@@ -10,6 +10,8 @@ import { HashRouter as Router, Route, Switch } from 'react-router-dom'
 import * as nearAPI from 'near-api-js'
 import {AccountData} from "./data/Account";
 import NearVodkaLogo from "./images/near_vodka_logo.png"
+import PostPage from "./pages/Post";
+import {PostData} from "./data/Post";
 
 // 4 epochs
 const NumBlocksNonArchival = 4 * 12 * 3600;
@@ -109,6 +111,16 @@ class App extends React.Component {
       return this._near.accounts[accountId] = Promise.resolve(AccountData.load(this._near, accountId));
     };
 
+    this._near.posts = {};
+    this._near.getPost = (accountId, blockHeight) => {
+      const key = `${accountId}/${blockHeight}`;
+      if (key in this._near.posts) {
+        return this._near.posts[key];
+      }
+      return this._near.posts[key] = Promise.resolve(PostData.load(this._near, accountId, blockHeight));
+    };
+
+
     if (this._near.accountId) {
       this._near.accountData = await this._near.getAccount(this._near.accountId);
       await this._near.accountData.fetchFollowings();
@@ -145,7 +157,11 @@ class App extends React.Component {
   }
 
   render() {
-    window.yo = this;
+    const passProps = {
+      _near: this._near,
+      updateState: (s) => this.setState(s),
+      ...this.state
+    };
     const header = !this.state.connected ? (
       <div>Connecting... <span className="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span></div>
     ) : (this.state.signedIn ? (
@@ -199,10 +215,13 @@ class App extends React.Component {
         <Router basename={process.env.PUBLIC_URL}>
           <Switch>
             <Route exact path={"/"}>
-              <HomePage _near={this._near} {...this.state} updateState={(s) => this.setState(s)}/>
+              <HomePage {...passProps}/>
             </Route>
             <Route exact path={"/a/:accountId"}>
-              <AccountPage _near={this._near} {...this.state} updateState={(s) => this.setState(s)} />
+              <AccountPage {...passProps} />
+            </Route>
+            <Route exact path={"/p/:accountId/:blockHeight"}>
+              <PostPage {...passProps} />
             </Route>
           </Switch>
         </Router>

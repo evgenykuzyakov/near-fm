@@ -47,14 +47,21 @@ function HomePage(props) {
             )}
             {followingSeed && followingSeed.length > 0 && (
               <div>
-                <h3>Feed</h3>
+                <h3>Your Feed</h3>
                 <Feed {...props} seed={followingSeed} extraPosts={props.newPosts}/>
               </div>
             )}
-            {latestSeed && (
+            {latestSeed && latestSeed.length > 0 && (
               <div>
-                <h3>Random</h3>
+                <h3>Random people</h3>
                 <Feed {...props} seed={latestSeed}/>
+              </div>
+            )}
+            {(!followingSeed || !latestSeed) && (
+              <div className="d-flex justify-content-center">
+                <div className="spinner-grow" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
               </div>
             )}
           </div>

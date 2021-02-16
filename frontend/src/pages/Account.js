@@ -28,7 +28,15 @@ function AccountPage(props) {
           <h3>Account @{accountId}</h3>
           <FollowButton {...props} accountId={accountId} account={account}/>
           <h3>Posts</h3>
-          {seed && <Feed {...props} seed={seed}/>}
+          {seed ? (
+            <Feed {...props} seed={seed}/>
+          ) : (
+            <div className="d-flex justify-content-center">
+              <div className="spinner-grow" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

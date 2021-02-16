@@ -16,15 +16,14 @@ function Feed(props) {
       if (blockHeight === 0) {
         break;
       }
-      const post = await props._near.blockViewCall(blockHeight, 'get_post', {account_id: accountId});
+
+      const post = await props._near.getPost(accountId, blockHeight);
       if (post) {
-        if (post.last_post_height > 0) {
-          recent.push([post.last_post_height, accountId])
+        if (post.lastPostHeight > 0) {
+          recent.push([post.lastPostHeight, accountId])
         }
-        posts.push({
-          accountId,
-          post
-        })
+        console.log(post);
+        posts.push(post);
         setPosts([...posts]);
       }
     }
@@ -37,12 +36,18 @@ function Feed(props) {
   }, [seed]);
 
   const feed = [...extraPosts, ...posts].map(post => {
-    const key = `${post.accountId}/${post.post.block_height}`;
-    return <Post key={key} accountId={post.accountId} post={post.post} {...props}/>;
+    const key = `${post.accountId}/${post.blockHeight}`;
+    return <Post key={key} post={post} {...props}/>;
   });
   return (
     <div>
-      {feed}
+      {seed !== false ? feed : (
+        <div className="d-flex justify-content-center">
+          <div className="spinner-grow" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

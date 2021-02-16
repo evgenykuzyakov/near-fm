@@ -30,7 +30,9 @@ function FollowButton(props) {
   return (
     <div className="follow-button mb-3">
       {(!account) ? (
-        <div>Loading</div>
+        <div className="spinner-grow" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
       ) : (accountId === props.signedAccountId) ? (
         <div>It's you</div>
       ) : (props.followings && (accountId in props.followings)) ? (
