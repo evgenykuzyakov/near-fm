@@ -172,7 +172,7 @@ class App extends React.Component {
           <div className="container-fluid">
             <a className="navbar-brand" href="/" title="NEAR Vodka - connecting people">
               <img src={NearVodkaLogo} alt="NEAR Vodka" className="d-inline-block align-middle" />
-              NEAR Vodka
+              [TESTNET] NEAR Vodka
             </a>
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"

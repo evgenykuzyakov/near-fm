@@ -138,7 +138,7 @@ impl Contract {
             initial_storage,
         } = storage_update;
         storage_account.used_bytes =
-            storage_account.used_bytes + initial_storage - env::storage_usage();
+            (storage_account.used_bytes + env::storage_usage()).saturating_sub(initial_storage);
         storage_account.assert_enough_balance();
         self.storage_accounts.insert(&account_id, &storage_account);
     }
