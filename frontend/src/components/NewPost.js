@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {convertPost} from "../data/Post";
+import AddStorageButton from "./AddStorageButton";
 
 function NewPost(props) {
   const [ body, setBody ] = useState("");
@@ -17,7 +18,7 @@ function NewPost(props) {
     setLoading(false);
   };
 
-  return (
+  return props.enoughStorageBalance ? (
     <div>
       <form>
         <div className="mb-3">
@@ -40,6 +41,18 @@ function NewPost(props) {
           </button>
         </div>
       </form>
+    </div>
+  ) : (
+    <div className="mb-3">
+      <div>
+        <div className="alert alert-danger" role="alert">
+          <b>Not enough storage balance!</b><br/>
+          Add storage balance to be able to post and follow people.
+        </div>
+      </div>
+      <div>
+        <AddStorageButton {...props}/>
+      </div>
     </div>
   );
 }

@@ -6,6 +6,10 @@ function FollowButton(props) {
   const account = props.account;
 
   const follow = async () => {
+    if (!props.enoughStorageBalance) {
+      alert('Add storage balance to follow');
+      return;
+    }
     if (!props.followings || (accountId in props.followings)) {
       return;
     }
@@ -37,8 +41,16 @@ function FollowButton(props) {
         <div>It's you</div>
       ) : (props.followings && (accountId in props.followings)) ? (
         <button className="btn btn-primary btn-unfollow" onClick={unfollow}><span>Following</span></button>
+      ) : (props.signedIn) ? (
+        <button
+          className="btn btn-outline-primary btn-follow"
+          onClick={follow}
+          >Follow</button>
       ) : (
-        <button className="btn btn-outline-primary btn-follow" onClick={follow}>Follow</button>
+        <button
+          className="btn btn-outline-secondary btn-follow"
+          disabled={true}
+          >Sign in to Follow</button>
       )}
     </div>
   );

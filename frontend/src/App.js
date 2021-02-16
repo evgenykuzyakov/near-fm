@@ -6,12 +6,14 @@ import "./App.scss";
 import './gh-fork-ribbon.css';
 import HomePage from "./pages/Home"
 import AccountPage from "./pages/Account"
-import { HashRouter as Router, Route, Switch } from 'react-router-dom'
+import {HashRouter as Router, Link, Route, Switch} from 'react-router-dom'
 import * as nearAPI from 'near-api-js'
 import {AccountData} from "./data/Account";
 import NearVodkaLogo from "./images/near_vodka_logo.png"
 import PostPage from "./pages/Post";
 import {PostData} from "./data/Post";
+import DiscoverPage from "./pages/Discover";
+import AddStorageButton from "./components/AddStorageButton";
 
 // 4 epochs
 const NumBlocksNonArchival = 4 * 12 * 3600;
@@ -68,6 +70,8 @@ class App extends React.Component {
       connected: false,
       isNavCollapsed: true,
       newPosts: [],
+      followers: {},
+      following: {},
     };
 
     this._initNear().then(() => {
@@ -111,6 +115,13 @@ class App extends React.Component {
       return this._near.accounts[accountId] = Promise.resolve(AccountData.load(this._near, accountId));
     };
 
+    this._near.cacheAccount = (accountId, account) => {
+      if (accountId in this._near.accounts) {
+        return;
+      }
+      this._near.accounts[accountId] = Promise.resolve(account);
+    };
+
     this._near.posts = {};
     this._near.getPost = (accountId, blockHeight) => {
       const key = `${accountId}/${blockHeight}`;
@@ -120,14 +131,19 @@ class App extends React.Component {
       return this._near.posts[key] = Promise.resolve(PostData.load(this._near, accountId, blockHeight));
     };
 
-
     if (this._near.accountId) {
       this._near.accountData = await this._near.getAccount(this._near.accountId);
+      await this._near.accountData.fetchStorageBalance();
       await this._near.accountData.fetchFollowings();
       this.setState({
         followings: Object.assign({}, this._near.accountData.followings),
         enoughStorageBalance: this._near.accountData.stats.enoughStorageBalance,
       });
+      this._near.accountData.fetchFollowers().then(() => {
+        this.setState({
+          followers: Object.assign({}, this._near.accountData.followers),
+        });
+      })
     }
   }
 
@@ -151,11 +167,6 @@ class App extends React.Component {
     })
   }
 
-  async requestStorageBalance(e) {
-    e.preventDefault();
-    await this._near.contract.storage_deposit({}, "30000000000000", "100000000000000000000000");
-  }
-
   render() {
     const passProps = {
       _near: this._near,
@@ -166,11 +177,7 @@ class App extends React.Component {
       <div>Connecting... <span className="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span></div>
     ) : (this.state.signedIn ? (
       <div>
-        {!this.state.enoughStorageBalance && (
-          <button
-            className="btn btn-primary me-md-2"
-            onClick={(e) => this.requestStorageBalance(e)}>Add storage balance</button>
-        )}
+        <AddStorageButton {...passProps}/>
         <button
           className="btn btn-outline-secondary"
           onClick={() => this.logOut()}>Log out ({this.state.signedAccountId})</button>
@@ -185,37 +192,55 @@ class App extends React.Component {
 
     return (
       <div className="App">
-        <nav className="navbar navbar-expand-lg navbar-light bg-light mb-3">
-          <div className="container-fluid">
-            <a className="navbar-brand" href="/" title="NEAR Vodka - connecting people">
-              <img src={NearVodkaLogo} alt="NEAR Vodka" className="d-inline-block align-middle" />
-              [TESTNET] NEAR Vodka
-            </a>
-            <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                <li className="nav-item">
-                  {/*<a className="nav-link active" aria-current="page" href="/">Home</a>*/}
-                </li>
-              </ul>
-              <form className="d-flex">
-                {header}
-              </form>
-            </div>
-          </div>
-        </nav>
-
-        <a className="github-fork-ribbon right-bottom fixed" href="https://github.com/evgenykuzyakov/near-vodka" data-ribbon="Fork me on GitHub"
-           title="Fork me on GitHub">Fork me on GitHub</a>
-
         <Router basename={process.env.PUBLIC_URL}>
+          <nav className="navbar navbar-expand-lg navbar-light bg-light mb-3">
+            <div className="container-fluid">
+              <a className="navbar-brand" href="/" title="NEAR Vodka - connecting people">
+                <img src={NearVodkaLogo} alt="NEAR Vodka" className="d-inline-block align-middle" />
+                [TESTNET] NEAR Vodka
+              </a>
+              <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                      aria-expanded="false" aria-label="Toggle navigation">
+                <span className="navbar-toggler-icon"></span>
+              </button>
+              <div className="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li className="nav-item">
+                    <Link className="nav-link" aria-current="page" to="/">Home</Link>
+                  </li>
+                  {this.state.signedIn && (
+                    <li className="nav-item">
+                      <Link className="nav-link" aria-current="page" to="/discover">Discover</Link>
+                    </li>
+                  )}
+                  {this.state.signedIn && (
+                    <li className="nav-item">
+                      <Link className="nav-link" aria-current="page"
+                            to={`/a/${this.state.signedAccountId}`}>Profile</Link>
+                    </li>
+                  )}
+                </ul>
+                <form className="d-flex">
+                  {header}
+                </form>
+              </div>
+            </div>
+          </nav>
+
+          <a className="github-fork-ribbon right-bottom fixed" href="https://github.com/evgenykuzyakov/near-vodka" data-ribbon="Fork me on GitHub"
+             title="Fork me on GitHub">Fork me on GitHub</a>
+
           <Switch>
             <Route exact path={"/"}>
-              <HomePage {...passProps}/>
+              {this.state.signedIn ? (
+                <HomePage {...passProps}/>
+              ) : (
+                <DiscoverPage {...passProps}/>
+              )}
+            </Route>
+            <Route exact path={"/discover"}>
+              <DiscoverPage {...passProps}/>
             </Route>
             <Route exact path={"/a/:accountId"}>
               <AccountPage {...passProps} />

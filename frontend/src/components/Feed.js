@@ -22,7 +22,6 @@ function Feed(props) {
         if (post.lastPostHeight > 0) {
           recent.push([post.lastPostHeight, accountId])
         }
-        console.log(post);
         posts.push(post);
         setPosts([...posts]);
       }
@@ -41,7 +40,13 @@ function Feed(props) {
   });
   return (
     <div>
-      {seed !== false ? feed : (
+      {seed !== false ? (
+        (feed.length > 0) ? feed : (
+          <div className="text-muted">
+            No posts.
+          </div>
+        )
+      ) : (
         <div className="d-flex justify-content-center">
           <div className="spinner-grow" role="status">
             <span className="visually-hidden">Loading...</span>
