@@ -195,10 +195,10 @@ class App extends React.Component {
         <Router basename={process.env.PUBLIC_URL}>
           <nav className="navbar navbar-expand-lg navbar-light bg-light mb-3">
             <div className="container-fluid">
-              <a className="navbar-brand" href="/" title="NEAR Vodka - connecting people">
+              <Link className="navbar-brand" to="/" title="NEAR Vodka - connecting people">
                 <img src={NearVodkaLogo} alt="NEAR Vodka" className="d-inline-block align-middle" />
                 [TESTNET] NEAR Vodka
-              </a>
+              </Link>
               <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                       data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                       aria-expanded="false" aria-label="Toggle navigation">
