@@ -1,5 +1,5 @@
 import "./Home.scss";
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import Feed from "../components/Feed";
 import {AccountData} from "../data/Account";
 import Followers from "../components/Followers";
@@ -7,39 +7,40 @@ import Followers from "../components/Followers";
 const FetchLimit = 100;
 
 function DiscoverPage(props) {
-  const [latestSeed, setLatestSeed] = useState(false);
+  const [seed, setSeed] = useState(false);
 
-  async function fetchRandomFeed() {
-    const numAccounts = await props._near.contract.get_num_accounts();
-    return (await props._near.contract.get_accounts({
-      from_index: Math.max(numAccounts - FetchLimit, 0),
-      limit: FetchLimit
-    })).map(([accountId, accountStats]) => {
-      let account = new AccountData(props._near, accountId, accountStats);
-      return [account.stats.lastPostHeight, accountId]
-    });
-  }
+  const fetchSeed = useCallback(async () => {
+    if (props.connected) {
+      const numAccounts = await props._near.contract.get_num_accounts();
+      return (await props._near.contract.get_accounts({
+        from_index: Math.max(numAccounts - FetchLimit, 0),
+        limit: FetchLimit
+      })).map(([accountId, accountStats]) => {
+        let account = new AccountData(props._near, accountId, accountStats);
+        return [account.stats.lastPostHeight, accountId]
+      });
+    } else {
+      return false;
+    }
+  }, [props.connected, props._near])
 
   useEffect(() => {
-    if (props.connected && props._near) {
-      fetchRandomFeed().then((seed) => {
-        setLatestSeed(seed);
-      });
-    }
-  }, [props.connected])
+    fetchSeed().then(setSeed);
+  }, [fetchSeed]);
+
 
   return (
     <div>
       <div className="container">
         <div className="row justify-content-md-center">
           <div className="col col-12 col-lg-8 col-xl-6">
-            {latestSeed && latestSeed.length > 0 && (
+            {seed && seed.length > 0 && (
               <div>
                 <h3>Discover</h3>
-                <Feed {...props} seed={latestSeed}/>
+                <Feed {...props} seed={seed}/>
               </div>
             )}
-            {!latestSeed && (
+            {!seed && (
               <div className="d-flex justify-content-center">
                 <div className="spinner-grow" role="status">
                   <span className="visually-hidden">Loading...</span>

@@ -19,8 +19,8 @@ function AccountPage(props) {
   }
 
   useEffect(() => {
-    if (props.connected && props._near && account) {
-      setSeed([[account.stats.lastPostHeight, accountId]]);
+    if (props.connected && account) {
+      setSeed([[account.stats.lastPostHeight, account.accountId]]);
     }
   }, [props.connected, account])
 

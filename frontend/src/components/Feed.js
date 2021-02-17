@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import Post from "./Post";
 import { SortedSet } from "collections/sorted-set";
 
 function Feed(props) {
+  const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
 
   const seed = props.seed;
   const extraPosts = props.extraPosts || [];
 
-  async function fetchPosts(seed) {
+  const fetchPosts = useCallback(async () => {
     const posts = [];
     const recent = SortedSet(seed);
     while (recent.length > 0 && posts.length < 10) {
@@ -26,13 +27,12 @@ function Feed(props) {
         setPosts([...posts]);
       }
     }
-  }
+  }, [seed, props._near])
 
   useEffect(() => {
-    if (seed !== false) {
-      fetchPosts(seed);
-    }
-  }, [seed]);
+    setLoading(true);
+    fetchPosts().then(() => setLoading(false))
+  }, [fetchPosts]);
 
   const feed = [...extraPosts, ...posts].map(post => {
     const key = `${post.accountId}/${post.blockHeight}`;
@@ -40,7 +40,7 @@ function Feed(props) {
   });
   return (
     <div>
-      {seed !== false ? (
+      {!loading ? (
         (feed.length > 0) ? feed : (
           <div className="text-muted">
             No posts.

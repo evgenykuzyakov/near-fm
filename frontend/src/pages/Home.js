@@ -1,5 +1,5 @@
 import "./Home.scss";
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import NewPost from "../components/NewPost";
 import Feed from "../components/Feed";
 import Followers from "../components/Followers";
@@ -8,20 +8,22 @@ import {Link} from "react-router-dom";
 function HomePage(props) {
   const [followingSeed, setFollowingSeed] = useState(false);
 
-  if (props.connected && followingSeed === false) {
-    const accountData = props._near.accountData;
-    if (accountData) {
-      const seed = Object.entries(accountData.followings).map(
-        ([accountId, account]) => [account.stats.lastPostHeight, accountId]
-      );
-      if (accountData.stats.lastPostHeight > 0) {
-        seed.push([accountData.stats.lastPostHeight, accountData.accountId]);
+  useEffect(() => {
+    if (props.connected) {
+      const accountData = props._near.accountData;
+      if (accountData) {
+        const seed = Object.entries(props.followings).map(
+          ([accountId, account]) => [account.stats.lastPostHeight, accountId]
+        );
+        if (accountData.stats.lastPostHeight > 0) {
+          seed.push([accountData.stats.lastPostHeight, accountData.accountId]);
+        }
+        setFollowingSeed(seed);
+      } else {
+        setFollowingSeed([]);
       }
-      setFollowingSeed(seed);
-    } else {
-      setFollowingSeed([]);
     }
-  }
+  }, [props.connected, props.followings, props._near.accountData])
 
   return (
     <div>

@@ -5,7 +5,7 @@ function FollowButton(props) {
   const accountId = props.accountId;
   const account = props.account;
 
-  const follow = async () => {
+  async function follow() {
     if (!props.enoughStorageBalance) {
       alert('Add storage balance to follow');
       return;
@@ -13,14 +13,14 @@ function FollowButton(props) {
     if (!props.followings || (accountId in props.followings)) {
       return;
     }
-    props._near.accountData.followings[accountId] = account.stats;
+    props._near.accountData.followings[accountId] = account;
     props.updateState({
       followings: Object.assign({}, props._near.accountData.followings),
     })
     await props._near.contract.follow({account_id: accountId});
-  };
+  }
 
-  const unfollow = async () => {
+  async function unfollow() {
     if (!props.followings || !(accountId in props.followings)) {
       return;
     }
@@ -29,7 +29,7 @@ function FollowButton(props) {
       followings: Object.assign({}, props._near.accountData.followings),
     })
     await props._near.contract.unfollow({account_id: accountId});
-  };
+  }
 
   return (
     <div className="follow-button mb-3">
