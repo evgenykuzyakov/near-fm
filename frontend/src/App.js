@@ -180,13 +180,13 @@ class App extends React.Component {
         <AddStorageButton {...passProps}/>
         <button
           className="btn btn-outline-secondary"
-          onClick={() => this.logOut()}>Log out ({this.state.signedAccountId})</button>
+          onClick={() => this.logOut()}>Sign out ({this.state.signedAccountId})</button>
       </div>
     ) : (
       <div>
         <button
           className="btn btn-primary"
-          onClick={(e) => this.requestSignIn(e)}>Log in with NEAR Wallet</button>
+          onClick={(e) => this.requestSignIn(e)}>Sign in with NEAR Wallet</button>
       </div>
     ));
 
