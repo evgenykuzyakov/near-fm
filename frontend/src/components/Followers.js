@@ -4,9 +4,9 @@ import AccountCard from "./AccountCard";
 
 function Followers(props) {
   const notFollowing = Object.keys(props.followers).filter((accountId) => !(accountId in props.followings));
-  const following = Object.keys(props.followers).filter((accountId) => (accountId in props.followings))
+  // const following = Object.keys(props.followers).filter((accountId) => (accountId in props.followings))
 
-  const followers = [...notFollowing, ...following].map((accountId) => {
+  const followers = notFollowing.map((accountId) => {
     const key = `f/${accountId}`;
     return (
       <div key={key} className="follower">
@@ -19,22 +19,19 @@ function Followers(props) {
     )
   });
 
-  return (
-    <div>
-      <h3>Your followers</h3>
-      {followers.length > 0 ? followers : (
-        <div className="text-muted">
-          No one is following you :(
-        </div>
-      )}
-      {!props.connected && (
-        <div className="d-flex justify-content-center">
-          <div className="spinner-grow" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )}
+  return !props.connected ? (
+    <div className="d-flex justify-content-center">
+      <div className="spinner-grow" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
     </div>
+  ) : (followers.length > 0) ? (
+    <div>
+      <h3>Follow back</h3>
+      {followers}
+    </div>
+  ) : (
+    <div />
   );
 }
 

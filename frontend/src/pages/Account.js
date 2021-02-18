@@ -12,7 +12,6 @@ function AccountPage(props) {
   const [account, setAccount] = useState(null);
 
   if (props.connected && props._near) {
-    console.log(props._near);
     props._near.getAccount(accountId).then((account) => {
       setAccount(account);
     })

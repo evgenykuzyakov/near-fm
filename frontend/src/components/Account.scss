@@ -1,14 +1,16 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
 .account {
   display: inline-block;
 }
 
 .account-tooltip {
-  border: #ddd 1px solid !important;
-  background-color: #fff !important;
-  color: #333 !important;
-  height: 200px;
+  font-size: $font-size-base !important;
+  font-weight: $font-weight-base !important;
+  // height: 200px;
   width: 300px;
   pointer-events: auto !important;
+  opacity: 1 !important;
   &:hover {
     visibility: visible !important;
     opacity: 1 !important;

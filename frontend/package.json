@@ -18,6 +18,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.0",
     "react-tooltip": "^4.2.13",
+    "react-uuid": "^1.0.2",
     "timeago-react": "^3.0.2"
   },
   "scripts": {
