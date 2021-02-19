@@ -34,11 +34,11 @@ function FollowTab(props) {
   }, [accountId, props._near, props.followings, props.signedIn, props.signedAccountId, showFollowers])
 
   useEffect(() => {
-    if (props.connected && !hidden && (!account || account.accountId !== accountId)) {
+    if (props.connected && !hidden) {
       setLoading(true);
       fetchAccount().then(() => setLoading(false))
     }
-  }, [accountId, props.connected, hidden, account, fetchAccount]);
+  }, [accountId, props.connected, hidden, account, fetchAccount, showFollowers]);
 
 
   const list = follow.map((accountId) => {

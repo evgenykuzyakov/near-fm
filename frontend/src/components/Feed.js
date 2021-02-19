@@ -1,15 +1,17 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import Post from "./Post";
 import { SortedSet } from "collections/sorted-set";
+import uuid from "react-uuid";
 
 function Feed(props) {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
+  const [gkey] = useState(uuid())
 
   const seed = props.seed;
   const extraPosts = props.extraPosts || [];
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (state) => {
     const posts = [];
     const recent = SortedSet(seed);
     while (recent.length > 0 && posts.length < 30) {
@@ -24,19 +26,33 @@ function Feed(props) {
           recent.push([post.lastPostHeight, accountId])
         }
         posts.push(post);
-        setPosts([...posts]);
+        if (state.mounted) {
+          setPosts([...posts]);
+        } else {
+          break;
+        }
       }
     }
   }, [seed, props._near])
 
   useEffect(() => {
+    let state = {
+      mounted: true
+    };
     setLoading(true);
-    fetchPosts().then(() => setLoading(false))
+    fetchPosts(state).then(() => {
+      if (state.mounted) {
+        setLoading(false)
+      }
+    })
+    return () => {
+      state.mounted = false;
+    }
   }, [seed, fetchPosts]);
 
   const feed = [...extraPosts, ...posts].map(post => {
-    const key = `${post.accountId}/${post.blockHeight}`;
-    return <Post key={key} post={post} {...props}/>;
+    const key = `${gkey}-${post.accountId}/${post.blockHeight}`;
+    return <Post {...props} key={key} post={post}/>;
   });
   return (
     <div>

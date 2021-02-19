@@ -245,6 +245,9 @@ class App extends React.Component {
             <Route exact path={"/a/:accountId"}>
               <AccountPage {...passProps} />
             </Route>
+            <Route path={"/a/:accountId/:suffix"}>
+              <AccountPage {...passProps} />
+            </Route>
             <Route exact path={"/p/:accountId/:blockHeight"}>
               <PostPage {...passProps} />
             </Route>

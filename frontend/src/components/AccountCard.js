@@ -9,7 +9,7 @@ function AccountCard(props) {
   const [account, setAccount] = useState(null);
   const [knownFollowers, setKnownFollowers] = useState([]);
   const [newFollowing, setNewFollowing] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [followsYou, setFollowsYou] = useState(false);
   const [key] = useState(uuid());
 
@@ -81,8 +81,12 @@ function AccountCard(props) {
               {followsYou && <span className="badge bg-secondary">Follows You</span>}
             </div>
             <div>
-              <span className="me-md-2"><b>{account.stats.numFollowing}</b> <span className="text-muted">following</span></span>
-              <span><b>{account.stats.numFollowers}</b> <span className="text-muted">followers</span></span>
+              <Link to={`/a/${accountId}/following`} className="following-followers">
+                <span className="me-md-2"><b>{account.stats.numFollowing}</b> <span className="text-muted">following</span></span>
+              </Link>
+              <Link to={`/a/${accountId}/followers`} className="following-followers">
+                <span><b>{account.stats.numFollowers}</b> <span className="text-muted">followers</span></span>
+              </Link>
             </div>
           </div>
           {props.signedIn && accountId !== props.signedAccountId && (
