@@ -57,6 +57,7 @@ class AccountData {
 
   async fetchFollowings() {
     if (this.followings !== false) {
+      await this.followingsFetch;
       return;
     }
     const promises = [];
@@ -68,13 +69,18 @@ class AccountData {
       }));
     }
     this.followings = {};
-    (await Promise.all(promises)).flat().forEach(([accountId, accountStats]) => {
-      this.followings[accountId] = new AccountData(this._near, accountId, accountStats);
+    this.followingsFetch = new Promise(async (resolve) => {
+      (await Promise.all(promises)).flat().forEach(([accountId, accountStats]) => {
+        this.followings[accountId] = new AccountData(this._near, accountId, accountStats);
+      });
+      resolve();
     });
+    await this.followingsFetch;
   }
 
   async fetchFollowers() {
     if (this.followers !== false) {
+      await this.followersFetch;
       return;
     }
     const promises = [];
@@ -86,9 +92,13 @@ class AccountData {
       }));
     }
     this.followers = {};
-    (await Promise.all(promises)).flat().forEach(([accountId, accountStats]) => {
-      this.followers[accountId] = new AccountData(this._near, accountId, accountStats);
+    this.followersFetch = new Promise(async (resolve) => {
+      (await Promise.all(promises)).flat().forEach(([accountId, accountStats]) => {
+        this.followers[accountId] = new AccountData(this._near, accountId, accountStats);
+      });
+      resolve();
     });
+    await this.followersFetch;
   }
 }
 

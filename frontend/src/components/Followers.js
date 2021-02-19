@@ -4,7 +4,6 @@ import AccountCard from "./AccountCard";
 
 function Followers(props) {
   const notFollowing = Object.keys(props.followers).filter((accountId) => !(accountId in props.followings));
-  // const following = Object.keys(props.followers).filter((accountId) => (accountId in props.followings))
 
   const followers = notFollowing.map((accountId) => {
     const key = `f/${accountId}`;
@@ -16,7 +15,7 @@ function Followers(props) {
           </div>
         </div>
       </div>
-    )
+    );
   });
 
   return !props.connected ? (
@@ -31,7 +30,7 @@ function Followers(props) {
       {followers}
     </div>
   ) : (
-    <div />
+    <div></div>
   );
 }
 

@@ -8,7 +8,9 @@ import uuid from "react-uuid";
 function AccountCard(props) {
   const [account, setAccount] = useState(null);
   const [knownFollowers, setKnownFollowers] = useState([]);
+  const [newFollowing, setNewFollowing] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [followsYou, setFollowsYou] = useState(false);
   const [key] = useState(uuid());
 
   const hidden = props.hidden;
@@ -18,25 +20,44 @@ function AccountCard(props) {
     let account = await props._near.getAccount(accountId);
     setAccount(account);
     if (props.signedIn && props.signedAccountId !== accountId) {
-      await account.fetchFollowers();
-      setKnownFollowers(Object.keys(account.followers).filter((accountId) => (accountId in props.followings)));
+      setFollowsYou(accountId in props.followers);
+      account.fetchFollowers().then(() => {
+        setKnownFollowers(Object.keys(account.followers).filter((accountId) => (accountId in props.followings)));
+      });
+      account.fetchFollowings().then(() => {
+        setNewFollowing(Object.keys(account.followings).filter((accountId) => !(accountId in props.followings) && accountId !== props.signedAccountId));
+      });
     }
-  }, [accountId, props._near, props.followings, props.signedIn, props.signedAccountId])
+  }, [accountId, props._near, props.followings, props.signedIn, props.signedAccountId, props.followers])
 
   useEffect(() => {
-    if (props.connected && !hidden && !account) {
+    if (props.connected && !hidden && (!account || account.accountId !== accountId)) {
       setLoading(true);
       fetchAccount().then(() => setLoading(false))
     }
-  }, [props.connected, hidden, account, fetchAccount]);
+  }, [props.connected, accountId, hidden, account, fetchAccount]);
 
-  const num = (knownFollowers.length === 4) ? 4 : 3;
-
-  const followers = knownFollowers.slice(0, num).map(
-    (accountId) => <Account key={`${key}-${accountId}`} {...props} accountId={accountId}/>
+  const followers = knownFollowers.slice(0, (knownFollowers.length === 4) ? 4 : 3).map(
+    (accountId, i) => (
+      <span key={`a-${key}-${accountId}`}>
+        {i > 0 && ", "}
+        <Account {...props} accountId={accountId}/>
+      </span>
+    )
   );
 
-  const andOthers = knownFollowers.length - followers.length;
+  const followersAndOthers = knownFollowers.length - followers.length;
+
+  const following = newFollowing.slice(0, (newFollowing.length === 4) ? 4 : 3).map(
+    (accountId, i) => (
+      <span key={`b-${key}-${accountId}`}>
+        {i > 0 && ", "}
+        <Account {...props} accountId={accountId}/>
+      </span>
+    )
+  );
+
+  const followingAndOthers = newFollowing.length - following.length;
 
   return (
     <div>
@@ -54,7 +75,10 @@ function AccountCard(props) {
           <FollowButton {...props} accountId={accountId} account={account}/>
           <div className="mb-2">
             <div>
-              {account.stats.numPosts ? <b>{account.stats.numPosts}</b> : <span className="text-muted">No</span>} <span className="text-muted">post{account.stats.numPosts !== 1 && "s"}</span>
+              <span className="me-md-2">
+                {account.stats.numPosts ? <b>{account.stats.numPosts}</b> : <span className="text-muted">No</span>} <span className="text-muted">post{account.stats.numPosts !== 1 && "s"}</span>
+              </span>
+              {followsYou && <span className="badge bg-secondary">Follows You</span>}
             </div>
             <div>
               <span className="me-md-2"><b>{account.stats.numFollowing}</b> <span className="text-muted">following</span></span>
@@ -62,13 +86,20 @@ function AccountCard(props) {
             </div>
           </div>
           {props.signedIn && accountId !== props.signedAccountId && (
-            <div className="text-muted">
-              { knownFollowers.length > 0 ? (
-                <div>
-                  Followed by {followers} {andOthers ? ` and ${andOthers} others you follow` : ""}
+            <div>
+              <div className="text-muted">
+                { followers.length > 0 ? (
+                  <div>
+                    Followed by {followers} {followersAndOthers ? ` and ${followersAndOthers} others you follow` : ""}
+                  </div>
+                ) : (
+                  "Not followed by anyone you know"
+                )}
+              </div>
+              { following.length > 0 && (
+                <div className="text-muted">
+                  Follows {following} {followingAndOthers ? ` and ${followingAndOthers} others you don't follow` : ""}
                 </div>
-              ) : (
-                "Not followed by anyone you know"
               )}
             </div>
           )}

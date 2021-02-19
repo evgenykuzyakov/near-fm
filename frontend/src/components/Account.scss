@@ -7,8 +7,8 @@
 .account-tooltip {
   font-size: $font-size-base !important;
   font-weight: $font-weight-base !important;
-  // height: 200px;
-  width: 300px;
+  min-height: 180px;
+  min-width: 300px;
   pointer-events: auto !important;
   opacity: 1 !important;
   &:hover {

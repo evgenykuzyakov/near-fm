@@ -12,7 +12,7 @@ function Feed(props) {
   const fetchPosts = useCallback(async () => {
     const posts = [];
     const recent = SortedSet(seed);
-    while (recent.length > 0 && posts.length < 10) {
+    while (recent.length > 0 && posts.length < 30) {
       const [blockHeight, accountId] = recent.pop();
       if (blockHeight === 0) {
         break;
@@ -32,7 +32,7 @@ function Feed(props) {
   useEffect(() => {
     setLoading(true);
     fetchPosts().then(() => setLoading(false))
-  }, [fetchPosts]);
+  }, [seed, fetchPosts]);
 
   const feed = [...extraPosts, ...posts].map(post => {
     const key = `${post.accountId}/${post.blockHeight}`;
@@ -40,13 +40,12 @@ function Feed(props) {
   });
   return (
     <div>
-      {!loading ? (
-        (feed.length > 0) ? feed : (
-          <div className="text-muted">
-            No posts.
-          </div>
-        )
-      ) : (
+      {(feed.length > 0) ? feed : !loading && (
+        <div className="text-muted">
+          No posts.
+        </div>
+      )}
+      {loading && (
         <div className="d-flex justify-content-center">
           <div className="spinner-grow" role="status">
             <span className="visually-hidden">Loading...</span>

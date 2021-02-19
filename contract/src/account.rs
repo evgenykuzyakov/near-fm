@@ -65,9 +65,7 @@ impl Contract {
             "Already following this account"
         );
         self.internal_set_account(&from_account_id, from_account);
-        self.finalize_storage_update(storage_update);
 
-        let storage_update = self.new_storage_update(account_id.clone());
         let mut account = self.internal_get_account(&account_id);
         assert!(
             account.followers.insert(&from_account_id),
@@ -92,9 +90,7 @@ impl Contract {
             "Not following this account"
         );
         self.internal_set_account(&from_account_id, from_account);
-        self.finalize_storage_update(storage_update);
 
-        let storage_update = self.new_storage_update(account_id.clone());
         let mut account = self.internal_get_account(&account_id);
         assert!(
             account.followers.remove(&from_account_id),

@@ -17,6 +17,7 @@ function Account(props) {
         id={key}
         type="light"
         border={true}
+        borderColor='rgb(222, 236, 230)'
         className='account-tooltip'
         delayHide={100}
         delayShow={200}
