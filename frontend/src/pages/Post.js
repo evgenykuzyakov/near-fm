@@ -18,7 +18,7 @@ function PostPage(props) {
       <div className="row justify-content-md-center">
         <div className="col col-12 col-lg-8 col-xl-6">
           {post ? (
-            <Post {...props} post={post}/>
+            <Post {...props} post={post} expanded={true}/>
           ) : (
             <div className="d-flex justify-content-center">
               <div className="spinner-grow" role="status">
