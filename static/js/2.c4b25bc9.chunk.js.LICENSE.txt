@@ -16,6 +16,13 @@ object-assign
   */
 
 /*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+/*!
  * The buffer module from node.js, for the browser.
  *
  * @author   Feross Aboukhadijeh <http://feross.org>
@@ -33,6 +40,13 @@ object-assign
  * Copyright(c) 2014 Jonathan Ong
  * Copyright(c) 2016 Douglas Christopher Wilson
  * MIT Licensed
+ */
+
+/*!
+ * repeat-string <https://github.com/jonschlinkert/repeat-string>
+ *
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 /*!
