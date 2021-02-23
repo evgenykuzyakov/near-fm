@@ -9,7 +9,7 @@ import AccountPage from "./pages/Account"
 import {HashRouter as Router, Link, Route, Switch} from 'react-router-dom'
 import * as nearAPI from 'near-api-js'
 import {AccountData} from "./data/Account";
-import NearVodkaLogo from "./images/near_vodka_logo.png"
+import Logo from "./images/logo.png"
 import PostPage from "./pages/Post";
 import {PostData} from "./data/Post";
 import DiscoverPage from "./pages/Discover";
@@ -18,7 +18,7 @@ import AddStorageButton from "./components/AddStorageButton";
 // 4 epochs
 const NumBlocksNonArchival = 4 * 12 * 3600;
 
-const IsMainnet = window.location.hostname === "near.vodka";
+const IsMainnet = window.location.hostname === "near.fm";
 const TestNearConfig = {
   networkId: 'testnet',
   nodeUrl: 'https://rpc.testnet.near.org',
@@ -150,7 +150,7 @@ class App extends React.Component {
 
   async requestSignIn(e) {
     e.preventDefault();
-    const appTitle = 'NEAR Vodka';
+    const appTitle = 'NEAR.fm';
     await this._near.walletConnection.requestSignIn(
       NearConfig.contractName,
       appTitle
@@ -195,9 +195,9 @@ class App extends React.Component {
         <Router basename={process.env.PUBLIC_URL}>
           <nav className="navbar navbar-expand-lg navbar-light bg-light mb-3">
             <div className="container-fluid">
-              <Link className="navbar-brand" to="/" title="NEAR Vodka - connecting people">
-                <img src={NearVodkaLogo} alt="NEAR Vodka" className="d-inline-block align-middle" />
-                [TESTNET] NEAR Vodka
+              <Link className="navbar-brand" to="/" title="NEAR.fm">
+                <img src={Logo} alt="NEAR.fm" className="d-inline-block align-middle" />
+                [TESTNET] NEAR.fm
               </Link>
               <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                       data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -228,7 +228,7 @@ class App extends React.Component {
             </div>
           </nav>
 
-          <a className="github-fork-ribbon right-bottom fixed" href="https://github.com/evgenykuzyakov/near-vodka" data-ribbon="Fork me on GitHub"
+          <a className="github-fork-ribbon right-bottom fixed" href="https://github.com/evgenykuzyakov/near-fm" data-ribbon="Fork me on GitHub"
              title="Fork me on GitHub">Fork me on GitHub</a>
 
           <Switch>

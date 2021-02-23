@@ -1,5 +1,5 @@
 [package]
-name = "near-vodka"
+name = "near-fm"
 version = "0.1.0"
 authors = ["Evgeny Kuzyakov <ek@near.org>"]
 edition = "2018"
