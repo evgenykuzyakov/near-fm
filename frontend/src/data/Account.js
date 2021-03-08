@@ -44,7 +44,8 @@ class AccountData {
     let storageBalance = await this._near.contract.storage_balance_of({account_id: this.accountId});
     this.stats.storageTotal = new BN(storageBalance.total);
     this.stats.storageAvailable = new BN(storageBalance.available);
-    this.stats.enoughStorageBalance = this.stats.storageAvailable > MinEnoughStorageBalance;
+    console.log(this.stats.storageAvailable, MinEnoughStorageBalance);
+    this.stats.enoughStorageBalance = this.stats.storageAvailable.gt(MinEnoughStorageBalance);
   }
 
   async fetchAccountStats() {
