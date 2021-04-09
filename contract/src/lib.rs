@@ -3,7 +3,8 @@ use near_sdk::collections::{LookupMap, UnorderedMap};
 use near_sdk::json_types::{ValidAccountId, U64};
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{
-    env, near_bindgen, AccountId, Balance, BlockHeight, PanicOnDefault, Promise, StorageUsage,
+    env, near_bindgen, AccountId, Balance, BlockHeight, BorshStorageKey, CryptoHash,
+    PanicOnDefault, Promise, StorageUsage,
 };
 
 pub use crate::account::*;
@@ -19,8 +20,16 @@ mod internal;
 mod post;
 mod storage_manager;
 
-#[global_allocator]
-static ALLOC: near_sdk::wee_alloc::WeeAlloc<'_> = near_sdk::wee_alloc::WeeAlloc::INIT;
+near_sdk::setup_alloc!();
+
+#[derive(BorshStorageKey, BorshSerialize)]
+pub(crate) enum StorageKey {
+    StorageAccounts,
+    Accounts,
+    Posts,
+    AccountFollowers { account_hash: CryptoHash },
+    AccountFollowing { account_hash: CryptoHash },
+}
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -38,11 +47,10 @@ pub struct Contract {
 impl Contract {
     #[init]
     pub fn new() -> Self {
-        assert!(!env::state_exists(), "Already initialized");
         let mut this = Self {
-            storage_accounts: LookupMap::new(b"s".to_vec()),
-            accounts: UnorderedMap::new(b"a".to_vec()),
-            posts: LookupMap::new(b"p".to_vec()),
+            storage_accounts: LookupMap::new(StorageKey::StorageAccounts),
+            accounts: UnorderedMap::new(StorageKey::Accounts),
+            posts: LookupMap::new(StorageKey::Posts),
             storage_account_in_bytes: 0,
         };
 

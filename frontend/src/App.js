@@ -23,7 +23,7 @@ const TestNearConfig = {
   networkId: 'testnet',
   nodeUrl: 'https://rpc.testnet.near.org',
   archivalNodeUrl: 'https://rpc.testnet.internal.near.org',
-  contractName: 'dev-1613368835598-7014445',
+  contractName: 'dev-1618002502637-4571210',
   walletUrl: 'https://wallet.testnet.near.org',
 };
 
@@ -102,10 +102,10 @@ class App extends React.Component {
     const block = await this._near.account.connection.provider.block({ finality: 'final' });
     this._near.lastBlockHeight = block.header.height;
     this._near.contract = new nearAPI.Contract(this._near.account, NearConfig.contractName, {
-      viewMethods: ['get_account', 'get_accounts', 'get_num_accounts', 'get_followers', 'get_following', 'get_post', 'storage_minimum_balance', 'storage_balance_of'],
+      viewMethods: ['get_account', 'get_accounts', 'get_num_accounts', 'get_followers', 'get_following', 'get_post', 'storage_balance_bounds', 'storage_balance_of'],
       changeMethods: ['storage_deposit', 'storage_withdraw', 'post', 'follow', 'unfollow'],
     });
-    this._near.storageMinimumBalance = await this._near.contract.storage_minimum_balance();
+    this._near.storageMinimumBalance = (await this._near.contract.storage_balance_bounds()).min;
 
     this._near.accounts = {};
     this._near.getAccount = (accountId) => {

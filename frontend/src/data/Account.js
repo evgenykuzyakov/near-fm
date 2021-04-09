@@ -41,7 +41,10 @@ class AccountData {
   }
 
   async fetchStorageBalance() {
-    let storageBalance = await this._near.contract.storage_balance_of({account_id: this.accountId});
+    let storageBalance = await this._near.contract.storage_balance_of({account_id: this.accountId}) || {
+      total: "0",
+      available: "0",
+    };
     this.stats.storageTotal = new BN(storageBalance.total);
     this.stats.storageAvailable = new BN(storageBalance.available);
     console.log(this.stats.storageAvailable, MinEnoughStorageBalance);
