@@ -23,10 +23,10 @@ function NewPost(props) {
     let _body = body;
     setLoading(true);
     setBody("");
-    let newPosts = convertPost(await props._near.contract.post({body: _body}));
-    newPosts.accountId = props.signedAccountId;
+    let newPost = convertPost(await props._near.contract.post({body: _body}));
+    newPost.accountId = props.signedAccountId;
     props.updateState({
-      newPosts: [...props.newPosts, newPosts]
+      newPosts: [...props.newPosts, newPost],
     })
     setLoading(false);
   };

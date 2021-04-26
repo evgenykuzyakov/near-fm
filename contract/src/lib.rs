@@ -9,15 +9,16 @@ use near_sdk::{
 
 pub use crate::account::*;
 use crate::internal::*;
+pub use crate::notification::*;
 pub use crate::post::*;
+use crate::post_meta::VPostMeta;
 pub use crate::storage_manager::*;
-
-const LONGEST_ACCOUNT_ID: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-const MAX_ACCOUNT_ID_LENGTH: usize = 64;
 
 mod account;
 mod internal;
+mod notification;
 mod post;
+mod post_meta;
 mod storage_manager;
 
 near_sdk::setup_alloc!();
@@ -29,6 +30,8 @@ pub(crate) enum StorageKey {
     Posts,
     AccountFollowers { account_hash: CryptoHash },
     AccountFollowing { account_hash: CryptoHash },
+    Notifications,
+    PostMetas,
 }
 
 #[near_bindgen]
@@ -41,6 +44,10 @@ pub struct Contract {
     pub posts: LookupMap<AccountId, VPost>,
 
     pub storage_account_in_bytes: StorageUsage,
+
+    pub notifications: LookupMap<AccountId, AccountNotifications>,
+
+    pub post_metas: LookupMap<PostLink, VPostMeta>,
 }
 
 #[near_bindgen]
@@ -52,6 +59,8 @@ impl Contract {
             accounts: UnorderedMap::new(StorageKey::Accounts),
             posts: LookupMap::new(StorageKey::Posts),
             storage_account_in_bytes: 0,
+            notifications: LookupMap::new(StorageKey::Notifications),
+            post_metas: LookupMap::new(StorageKey::PostMetas),
         };
 
         this.measure_storage_account_in_bytes();
@@ -60,8 +69,7 @@ impl Contract {
     }
 
     fn measure_storage_account_in_bytes(&mut self) {
-        let account_id = LONGEST_ACCOUNT_ID.to_string();
-        assert_eq!(account_id.len(), MAX_ACCOUNT_ID_LENGTH);
+        let account_id = "a".repeat(64);
         let initial_storage = env::storage_usage();
         self.storage_accounts.insert(
             &account_id,

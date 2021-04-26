@@ -52,7 +52,7 @@ function AccountPage(props) {
                       <NewPost {...props}/>
                     )}
                     {seed ? (
-                      <Feed {...props} seed={seed}/>
+                      <Feed {...props} seed={seed} extraPosts={props.newPosts}/>
                     ) : (
                       <div className="d-flex justify-content-center">
                         <div className="spinner-grow" role="status">

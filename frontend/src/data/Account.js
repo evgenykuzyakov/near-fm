@@ -22,6 +22,8 @@ class AccountData {
       numFollowing: 0,
       numPosts: 0,
       enoughStorageBalance: false,
+      storageAvailable: new BN(0),
+      storageTotal: new BN(0),
     };
     if (accountStats) {
       Object.assign(this.stats, convertAccountStats(accountStats));
@@ -47,7 +49,6 @@ class AccountData {
     };
     this.stats.storageTotal = new BN(storageBalance.total);
     this.stats.storageAvailable = new BN(storageBalance.available);
-    console.log(this.stats.storageAvailable, MinEnoughStorageBalance);
     this.stats.enoughStorageBalance = this.stats.storageAvailable.gt(MinEnoughStorageBalance);
   }
 

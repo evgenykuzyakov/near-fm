@@ -170,7 +170,7 @@ class App extends React.Component {
   render() {
     const passProps = {
       _near: this._near,
-      updateState: (s) => this.setState(s),
+      updateState: (s, c) => this.setState(s, c),
       ...this.state
     };
     const header = !this.state.connected ? (
@@ -178,6 +178,9 @@ class App extends React.Component {
     ) : (this.state.signedIn ? (
       <div>
         <AddStorageButton {...passProps}/>
+        <span>
+          {(this._near.accountData.stats.storageAvailable / 1e24).toFixed(3)} / {(this._near.accountData.stats.storageTotal / 1e24).toFixed(3)}
+        </span>
         <button
           className="btn btn-outline-secondary"
           onClick={() => this.logOut()}>Sign out ({this.state.signedAccountId})</button>

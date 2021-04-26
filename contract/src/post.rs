@@ -1,12 +1,36 @@
 use crate::*;
+use near_sdk::json_types::WrappedTimestamp;
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Post {
-    pub body: String,
-    pub time: U64,
+    pub body: PostBody,
+    pub time: WrappedTimestamp,
     pub block_height: BlockHeight,
     pub last_post_height: BlockHeight,
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct PostLink {
+    pub account_id: ValidAccountId,
+    pub block_height: BlockHeight,
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub enum PostBody {
+    Text {
+        text: String,
+    },
+    Repost {
+        text: Option<String>,
+        orig: PostLink,
+    },
+    Comment {
+        text: String,
+        orig: PostLink,
+    },
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -30,7 +54,7 @@ impl From<VPost> for Post {
 
 #[near_bindgen]
 impl Contract {
-    pub fn post(&mut self, body: String) -> Post {
+    pub fn post(&mut self, body: PostBody) -> Post {
         let account_id = env::predecessor_account_id();
         let storage_update = self.new_storage_update(account_id.clone());
         let mut account = self.internal_get_account(&account_id);

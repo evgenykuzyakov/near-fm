@@ -1,5 +1,5 @@
 use crate::*;
-use near_sdk::collections::{UnorderedSet, Vector};
+use near_sdk::collections::{LazyOption, UnorderedSet, Vector};
 
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Account {
@@ -73,6 +73,13 @@ impl Contract {
         );
         self.internal_set_account(&account_id, account);
         self.finalize_storage_update(storage_update);
+
+        self.internal_notify_account(
+            &account_id,
+            Notification::FollowedBy {
+                account_id: from_account_id,
+            },
+        );
     }
 
     pub fn unfollow(&mut self, account_id: String) {
@@ -98,6 +105,13 @@ impl Contract {
         );
         self.internal_set_account(&account_id, account);
         self.finalize_storage_update(storage_update);
+
+        self.internal_notify_account(
+            &account_id,
+            Notification::UnfollowedBy {
+                account_id: from_account_id,
+            },
+        );
     }
 
     pub fn get_followers(
@@ -162,12 +176,11 @@ impl Contract {
     pub(crate) fn internal_create_account(&mut self, account_id: &AccountId) -> Account {
         let account_hash = hash(account_id);
         let account = Account {
-            following: UnorderedSet::new(StorageKey::AccountFollowing {
-                account_hash: account_hash.clone(),
-            }),
+            following: UnorderedSet::new(StorageKey::AccountFollowing { account_hash }),
             followers: UnorderedSet::new(StorageKey::AccountFollowers { account_hash }),
             num_posts: 0,
             last_post_height: 0,
+            notifications: LazyOption::new(StorageKey::AccountNotifications { account_hash }, None),
         };
         let v_account = account.into();
         assert!(
